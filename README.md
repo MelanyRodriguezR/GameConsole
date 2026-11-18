@@ -85,7 +85,7 @@ Se necesita Node.js 20+ y SWI-Prolog.
    ```
 2. Consola, usando el GameStats publicado en Render:
    ```bash
-   cd consola && INGEST_URL=https://gamestats-ingest.onrender.com ANALYTICS_URL=https://gamestats-analytics-nz8a.onrender.com node server.js
+   cd consola && INGEST_URL=https://gameconsole-ingest.onrender.com ANALYTICS_URL=https://gameconsole-analytics.onrender.com node server.js
    ```
    Para usar un GameStats local (`docker compose up analytics ingest` en el Proyecto 1), basta con `node server.js`,
    que por defecto usa `localhost:8080` y `localhost:9000`.
@@ -171,7 +171,7 @@ como evento `AI_DECISION`.
 - **Estadísticas dinámicas (sin recompilar GameStats).** GameStats no conoce nuestros juegos por nombre: un solo
   analizador genérico interpreta las estadísticas que cada juego declara al empezar la partida. La prueba integrada
   lo demuestra con "dardos", un juego que no existe en ningún lado y que igual recibe ganador, tabla y récords.
-  Cambio en GameStats: rama `juegos-gameconsole` de `github.com/mauroza/GameStats` (`DynamicAnalyzer.scala`).
+  Cambio en GameStats: copia `github.com/MelanyRodriguezR/GameStats`, rama `juegos-gameconsole` (`DynamicAnalyzer.scala`); el repositorio original no se toca.
 - **La IA nunca frena el juego.** Las preguntas a Prolog son asíncronas: mientras llega la respuesta, el luchador
   sigue con la última decisión.
 
@@ -216,18 +216,20 @@ bash scripts/e2e.sh                                     # todo integrado (Docker
 
 ## Deployment (Render)
 
-Igual que GameStats: [`render.yaml`](render.yaml) define dos servicios Docker gratis, `gameconsole` (consola) y
-`gameconsole-prolog`. La consola usa el GameStats ya publicado:
+Igual que GameStats: [`render.yaml`](render.yaml) es un Blueprint que crea **4 servicios Docker gratis**. Dos salen de
+este repositorio y dos de la copia de GameStats con el analizador dinámico (`MelanyRodriguezR/GameStats`, rama
+`juegos-gameconsole`):
 
 | Servicio | URL |
 |---|---|
 | Consola | https://gameconsole.onrender.com |
 | IA Prolog | https://gameconsole-prolog.onrender.com |
-| GameStats ingest / analytics | https://gamestats-ingest.onrender.com · https://gamestats-analytics-nz8a.onrender.com |
+| GameStats ingest | https://gameconsole-ingest.onrender.com |
+| GameStats analytics | https://gameconsole-analytics.onrender.com |
 
-Crear desde cero: Render → **New → Blueprint** → elegir este repositorio. Si Render asigna otra URL a Prolog,
-cambiar `PROLOG_URL` en `render.yaml`. En el plan gratis los servicios se duermen tras 15 min: **antes de la demo,
-abrir las 4 URLs** y esperar ~1 min.
+Crear desde cero: Render → **New → Blueprint** → elegir este repositorio. Si Render le pone otra URL a algún
+servicio (agrega un sufijo cuando el nombre ya existe), actualizar las URLs en `render.yaml`. En el plan gratis los
+servicios se duermen tras 15 min: **antes de la demo, abrir las 4 URLs** y esperar ~1 min.
 
 ## Equipo
 

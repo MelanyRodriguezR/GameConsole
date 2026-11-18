@@ -10,7 +10,7 @@
   // ---- ¿A dónde se mandan los eventos? ----
   var DESTINOS = {
     local:  "http://localhost:8080/events",
-    render: "https://gamestats-ingest.onrender.com/events",
+    render: "https://gameconsole-ingest.onrender.com/events",
     off:    null
   };
 

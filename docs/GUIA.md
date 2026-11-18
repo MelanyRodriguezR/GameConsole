@@ -84,7 +84,7 @@ cd consola && node server.js
 ```
 Por defecto busca GameStats en `localhost:8080` y `localhost:9000`. Para usar el de Render:
 ```bash
-cd consola && INGEST_URL=https://gamestats-ingest.onrender.com ANALYTICS_URL=https://gamestats-analytics-nz8a.onrender.com node server.js
+cd consola && INGEST_URL=https://gameconsole-ingest.onrender.com ANALYTICS_URL=https://gameconsole-analytics.onrender.com node server.js
 ```
 
 ---
@@ -176,22 +176,16 @@ cada vez que llega un juego nuevo. Se resolvió con **un solo analizador dinámi
 **Prueba de que es dinámico:** `scripts/partidas-demo.js` también manda partidas de **"dardos"**, un juego que no
 existe ni en la consola ni en GameStats, y GameStats igual le calcula ganador, tabla de posiciones, dianas y récords.
 
-**Para probarlo hoy** (con la copia local de GameStats):
-```bash
-GAMESTATS_CONTEXT=../GameStats docker compose up --build
-```
-En PowerShell, primero `$env:GAMESTATS_CONTEXT="../GameStats"` y luego `docker compose up --build`.
+**Dónde está publicado:** en la **copia propia** (fork) **`github.com/MelanyRodriguezR/GameStats`**, rama
+`juegos-gameconsole`. El repositorio original de Mauro **no se tocó**: el Proyecto 1 sigue exactamente como se entregó.
 
-**Para que quede publicado** (lo hace Mauro, o tú si eres colaboradora del repo):
-```bash
-cd C:\Users\melan\Downloads\GameStats
-```
-```bash
-git push -u origin juegos-gameconsole
-```
-Luego, en GitHub, abrir un *Pull Request* de `juegos-gameconsole` hacia `main` y aceptarlo (*Merge*). Con eso:
-- Render vuelve a desplegar GameStats solo, ya con el analizador dinámico.
-- El `docker compose up --build` normal (sin `GAMESTATS_CONTEXT`) ya los incluye.
+- `docker compose up --build` construye GameStats desde esa copia, sin configurar nada.
+- `render.yaml` despliega en Render un GameStats propio del Proyecto 2 (`gameconsole-ingest` y `gameconsole-analytics`)
+  desde esa misma copia.
+- Para probar cambios de GameStats que todavía no están subidos, se usa la carpeta local:
+  en PowerShell `$env:GAMESTATS_CONTEXT="../GameStats"` y luego `docker compose up --build`.
+- Opcional: hay un Pull Request propuesto a `mauroza/GameStats`. Si Mauro lo acepta, todo puede volver a apuntar al
+  repositorio original cambiando la URL en `docker-compose.yml` y `render.yaml`.
 
 ---
 
@@ -201,8 +195,8 @@ Luego, en GitHub, abrir un *Pull Request* de `juegos-gameconsole` hacia `main` y
 |---|---|---|---|
 | 1 | **Subir a GitHub** | tú | Crear un repo vacío en github.com (por ejemplo `GameConsole`, **público**), y luego: `git remote add origin https://github.com/<usuario>/GameConsole.git` y `git push -u origin main` |
 | 2 | **Revisar el CI** | tú + Claude | En GitHub → pestaña *Actions*: los 4 trabajos deben quedar en verde. Si alguno falla, copiar el error y lo arreglamos. |
-| 3 | **Publicar el analizador dinámico de GameStats** | Mauro (o tú) | Push de la rama `juegos-gameconsole` + Pull Request + Merge (observación A) |
-| 4 | **Deploy en Render** | tú | render.com → *New* → *Blueprint* → elegir el repo. Crea `gameconsole` y `gameconsole-prolog`. Si Render les pone otro nombre, cambiar `PROLOG_URL` en `render.yaml`. |
+| 3 | ~~Publicar el analizador dinámico~~ | — | ✅ hecho: está en tu copia `MelanyRodriguezR/GameStats` |
+| 4 | **Deploy en Render** | tú | render.com → *New* → *Blueprint* → elegir el repo `GameConsole`. Crea 4 servicios: `gameconsole`, `gameconsole-prolog`, `gameconsole-ingest` y `gameconsole-analytics`. Si Render les pone otro nombre, cambiar las URLs en `render.yaml`. |
 | 5 | **Probar en Render** | tú | Abrir las 4 URLs del README (se duermen tras 15 min: esperar ~1 min la primera vez). |
 | 6 | **Borrar `juegos-viejos/`** | tú | Ya no se usa y no está en git; se puede borrar a mano. |
 | 7 | **Grabar el video** | ustedes | Seguir `docs/GUION-VIDEO.md`; subirlo a YouTube (no listado está bien) y poner el link en el README y en la entrega. |

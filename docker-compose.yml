@@ -8,7 +8,11 @@
 #   ingest     (GameStats, Go)     http://localhost:8080   recibe los eventos
 #   analytics  (GameStats, Scala)  http://localhost:9000   calcula las estadísticas
 #
-# ingest y analytics se construyen desde el código del Proyecto 1 (github.com/mauroza/GameStats).
+# ingest y analytics se construyen desde el código del Proyecto 1. Se usa la copia (fork)
+# github.com/MelanyRodriguezR/GameStats, rama juegos-gameconsole, que agrega el analizador
+# DINÁMICO (estadísticas generales + las que declara cada juego). El repositorio original
+# (github.com/mauroza/GameStats) no se toca.
+# Para usar otro GameStats: GAMESTATS_CONTEXT=<repo git#rama o carpeta local> docker compose up --build
 # La primera vez tarda varios minutos (compila Go y Scala); después queda en caché.
 # La carpeta ./juegos se monta en la consola: si copias ahí un juego nuevo con su
 # manifest.json, aparece en la consola en unos segundos SIN reiniciar nada.
@@ -35,10 +39,10 @@ services:
     ports: ["8081:8081"]
     restart: unless-stopped
 
-  # GameStats se construye desde su repositorio público (las imágenes de GHCR son privadas).
+  # GameStats se construye desde el código (las imágenes de GHCR del Proyecto 1 son privadas).
   ingest:
     build:
-      context: ${GAMESTATS_CONTEXT:-https://github.com/mauroza/GameStats.git#main}
+      context: ${GAMESTATS_CONTEXT:-https://github.com/MelanyRodriguezR/GameStats.git#juegos-gameconsole}
       dockerfile: ingest/Dockerfile
     ports: ["8080:8080"]
     environment:
@@ -51,7 +55,7 @@ services:
 
   analytics:
     build:
-      context: ${GAMESTATS_CONTEXT:-https://github.com/mauroza/GameStats.git#main}
+      context: ${GAMESTATS_CONTEXT:-https://github.com/MelanyRodriguezR/GameStats.git#juegos-gameconsole}
       dockerfile: analytics/Dockerfile
     ports: ["9000:9000"]
     environment:

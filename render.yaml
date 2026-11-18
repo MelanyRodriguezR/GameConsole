@@ -1,12 +1,16 @@
-# Deploy en Render (plan gratis) como Blueprint — igual que GameStats (Proyecto 1).
+# Deploy en Render (plan gratis) como Blueprint — mismo enfoque que GameStats (Proyecto 1).
 #
-# Render construye las imágenes desde los Dockerfiles del repo y vuelve a desplegar en cada
-# push a main (deploy continuo). Los servicios gratis no tienen red privada, así que la
-# consola llama a Prolog y a GameStats por sus URLs públicas.
+# Un solo Blueprint crea los 4 servicios:
+#   gameconsole              la consola (este repositorio)
+#   gameconsole-prolog       la IA en SWI-Prolog (este repositorio)
+#   gameconsole-analytics    GameStats analytics  ┐ desde la copia github.com/MelanyRodriguezR/GameStats,
+#   gameconsole-ingest       GameStats ingest     ┘ rama juegos-gameconsole (con el analizador dinámico)
 #
-# Crear: Render → New → Blueprint → conectar este repositorio. Si Render le da a algún
-# servicio una URL distinta (agrega un sufijo cuando el nombre ya existe), actualizar
-# PROLOG_URL abajo.
+# Render construye las imágenes desde los Dockerfiles y vuelve a desplegar en cada push (deploy continuo).
+# Los servicios gratis no tienen red privada: se llaman por sus URLs públicas.
+#
+# Crear: Render → New → Blueprint → conectar ESTE repositorio. Si Render le pone a algún servicio
+# una URL distinta (agrega un sufijo cuando el nombre ya existe), actualizar las URLs de abajo.
 services:
   - type: web
     name: gameconsole
@@ -18,9 +22,9 @@ services:
     healthCheckPath: /api/juegos
     envVars:
       - key: INGEST_URL
-        value: https://gamestats-ingest.onrender.com
+        value: https://gameconsole-ingest.onrender.com
       - key: ANALYTICS_URL
-        value: https://gamestats-analytics-nz8a.onrender.com
+        value: https://gameconsole-analytics.onrender.com
       - key: PROLOG_URL
         value: https://gameconsole-prolog.onrender.com
 
@@ -32,3 +36,42 @@ services:
     dockerfilePath: ./prolog/Dockerfile
     dockerContext: ./prolog
     healthCheckPath: /health
+
+  - type: web
+    name: gameconsole-analytics
+    runtime: docker
+    plan: free
+    region: oregon
+    repo: https://github.com/MelanyRodriguezR/GameStats
+    branch: juegos-gameconsole
+    dockerfilePath: ./analytics/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "9000"
+      - key: JAVA_TOOL_OPTIONS
+        value: -Xmx300m -XX:+UseSerialGC
+
+  - type: web
+    name: gameconsole-ingest
+    runtime: docker
+    plan: free
+    region: oregon
+    repo: https://github.com/MelanyRodriguezR/GameStats
+    branch: juegos-gameconsole
+    dockerfilePath: ./ingest/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: ADDR
+        value: ":8080"
+      - key: PORT
+        value: "8080"
+      - key: ANALYTICS_URL
+        value: https://gameconsole-analytics.onrender.com/matches
+      - key: WORKERS
+        value: "4"
+      # analytics gratis se duerme tras 15 min y tarda ~1 min en despertar
+      - key: SEND_RETRIES
+        value: "8"
