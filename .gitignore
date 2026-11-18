@@ -3,3 +3,6 @@ consola/data/
 *.log
 .env
 .claude/settings.local.json
+
+# Versiones viejas de los juegos (ya no se usan)
+juegos-viejos/
