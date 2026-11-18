@@ -24,9 +24,9 @@ services:
       - key: INGEST_URL
         value: https://gameconsole-ingest.onrender.com
       - key: ANALYTICS_URL
-        value: https://gameconsole-analytics.onrender.com
+        value: https://gameconsole-analytics-zdfb.onrender.com
       - key: PROLOG_URL
-        value: https://gameconsole-prolog.onrender.com
+        value: https://gameconsole-prolog-x51m.onrender.com
 
   - type: web
     name: gameconsole-prolog
@@ -69,7 +69,7 @@ services:
       - key: PORT
         value: "8080"
       - key: ANALYTICS_URL
-        value: https://gameconsole-analytics.onrender.com/matches
+        value: https://gameconsole-analytics-zdfb.onrender.com/matches
       - key: WORKERS
         value: "4"
       # analytics gratis se duerme tras 15 min y tarda ~1 min en despertar

@@ -84,7 +84,7 @@ cd consola && node server.js
 ```
 Por defecto busca GameStats en `localhost:8080` y `localhost:9000`. Para usar el de Render:
 ```bash
-cd consola && INGEST_URL=https://gameconsole-ingest.onrender.com ANALYTICS_URL=https://gameconsole-analytics.onrender.com node server.js
+cd consola && INGEST_URL=https://gameconsole-ingest.onrender.com ANALYTICS_URL=https://gameconsole-analytics-zdfb.onrender.com node server.js
 ```
 
 ---

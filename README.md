@@ -85,7 +85,7 @@ Se necesita Node.js 20+ y SWI-Prolog.
    ```
 2. Consola, usando el GameStats publicado en Render:
    ```bash
-   cd consola && INGEST_URL=https://gameconsole-ingest.onrender.com ANALYTICS_URL=https://gameconsole-analytics.onrender.com node server.js
+   cd consola && INGEST_URL=https://gameconsole-ingest.onrender.com ANALYTICS_URL=https://gameconsole-analytics-zdfb.onrender.com node server.js
    ```
    Para usar un GameStats local (`docker compose up analytics ingest` en el Proyecto 1), basta con `node server.js`,
    que por defecto usa `localhost:8080` y `localhost:9000`.
@@ -221,10 +221,10 @@ este repositorio y dos de la copia de GameStats con el analizador dinámico (`Me
 
 | Servicio | URL |
 |---|---|
-| Consola | https://gameconsole.onrender.com |
-| IA Prolog | https://gameconsole-prolog.onrender.com |
+| Consola | https://gameconsole-w8oh.onrender.com |
+| IA Prolog | https://gameconsole-prolog-x51m.onrender.com |
 | GameStats ingest | https://gameconsole-ingest.onrender.com |
-| GameStats analytics | https://gameconsole-analytics.onrender.com |
+| GameStats analytics | https://gameconsole-analytics-zdfb.onrender.com |
 
 Crear desde cero: Render → **New → Blueprint** → elegir este repositorio. Si Render le pone otra URL a algún
 servicio (agrega un sufijo cuando el nombre ya existe), actualizar las URLs en `render.yaml`. En el plan gratis los
