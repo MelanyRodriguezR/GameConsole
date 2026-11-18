@@ -105,6 +105,22 @@ Variables: `PORT` (3000), `JUEGOS_DIR` (../juegos), `INGEST_URL`, `ANALYTICS_URL
    `?gamestats=<url de eventos>&prolog=<url de la IA>&instancia=<id>&modo=<modo>&consola=1`
 3. El juego manda sus eventos (formato GameStats) a la URL de `gamestats`, y puede avisarle a la consola con
    `window.parent.postMessage({ fuente: "gameconsole-juego", instancia, tipo: "evento", evento }, "*")`.
+4. **Estadísticas.** No hay que tocar GameStats:
+   - **Generales**, para cualquier juego: basta con mandar `MATCH_FINISHED.data.winner` (o `PLAYER_WON`) y, si el juego
+     tiene puntaje, `MATCH_FINISHED.data.scores` (`{ "jugador": puntos }`). Con eso GameStats calcula partidas,
+     victorias, empates, % de victorias, mejor puntaje, tiempo promedio y los **récords generales** (puntaje más alto,
+     más victorias, victoria más rápida, partida más larga).
+   - **Específicas**: el juego las **declara** en `MATCH_STARTED.data.metrics` y GameStats las calcula con su analizador
+     **dinámico** (un solo analizador para todos los juegos):
+     ```json
+     { "id": "aciertos",  "label": "Golpes acertados", "action": "ATTACK", "where": { "hit": true }, "op": "count" },
+     { "id": "dano",      "label": "Daño causado",     "action": "ATTACK", "field": "damage", "op": "sum", "record": "max" },
+     { "id": "recibido",  "label": "Daño recibido",    "action": "ATTACK", "field": "damage", "player": "targetId", "op": "sum" },
+     { "id": "precision", "label": "% acierto",        "op": "pct", "of": "aciertos", "over": "ataques" },
+     { "id": "decisiones","label": "Decisiones de la IA", "action": "AI_DECISION", "field": "decision", "op": "countBy", "scope": "match" }
+     ```
+     `op`: `count` · `sum` · `max` · `min` · `avg` · `last` · `pct` · `countBy`. `record: "max" | "min"` la convierte en récord del juego.
+     En los juegos se declaran en el método `estadisticas()` de cada clase (Template Method: `JuegoBase` lo manda solo).
 
 Se agrega **sin reiniciar nada**: copiando la carpeta a `juegos/` (aparece en ≤ 4 s) o pegando la URL de su
 `manifest.json` en la consola, en "Agregar un juego nuevo". Si el manifiesto no cumple el contrato, la consola dice qué falta.
@@ -150,7 +166,12 @@ como evento `AI_DECISION`.
 - **CORS.** GameStats no tiene CORS. En lugar de cambiarlo, los juegos mandan los eventos a la consola
   (`/api/events`) y la consola los reenvía a ingest. El panel lee los resultados a través de `/api/panel`.
 - **El panel no calcula.** Muestra lo que devuelven `analytics /results/...` e `ingest /matches` y `/stats`.
-  "Veces jugado" y "tiempo promedio" vienen de `/results/games/<id>`. Las partidas en curso vienen de ingest.
+  "Veces jugado", "tiempo promedio", tabla de posiciones y **récords** vienen de `/results/games/<id>`. Las partidas en
+  curso vienen de ingest. Hasta los nombres de las columnas los manda GameStats (`labels`).
+- **Estadísticas dinámicas (sin recompilar GameStats).** GameStats no conoce nuestros juegos por nombre: un solo
+  analizador genérico interpreta las estadísticas que cada juego declara al empezar la partida. La prueba integrada
+  lo demuestra con "dardos", un juego que no existe en ningún lado y que igual recibe ganador, tabla y récords.
+  Cambio en GameStats: rama `juegos-gameconsole` de `github.com/mauroza/GameStats` (`DynamicAnalyzer.scala`).
 - **La IA nunca frena el juego.** Las preguntas a Prolog son asíncronas: mientras llega la respuesta, el luchador
   sigue con la última decisión.
 

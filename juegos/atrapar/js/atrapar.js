@@ -44,6 +44,17 @@
 
     alTerminar() {}
 
+    // Lo que GameStats debe medir de este juego. Los puntos finales van en MATCH_FINISHED.data.scores.
+    estadisticas() {
+      return [
+        { id: "atrapados", label: "Objetos atrapados", action: "ITEM_CAUGHT", op: "count" },
+        { id: "estrellas", label: "⭐ Estrellas",      action: "ITEM_CAUGHT", where: { item: "estrella" }, op: "count" },
+        { id: "doradas",   label: "🌟 Doradas",        action: "ITEM_CAUGHT", where: { item: "dorada" }, op: "count", record: "max" },
+        { id: "bombas",    label: "💣 Bombas",         action: "ITEM_CAUGHT", where: { item: "bomba" }, op: "count" },
+        { id: "por_tipo",  label: "Objetos por tipo",  action: "ITEM_CAUGHT", field: "item", op: "countBy", scope: "match" }
+      ];
+    }
+
     _cuadro(ahora) {
       var dt = Math.min(0.05, (ahora - this._ultimo) / 1000);
       this._ultimo = ahora;

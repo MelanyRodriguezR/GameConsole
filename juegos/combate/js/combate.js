@@ -45,6 +45,21 @@
 
     alTerminar() { /* el último cuadro ya muestra al campeón */ }
 
+    // Lo que GameStats debe medir de este juego (lo calcula GameStats, no el juego).
+    estadisticas() {
+      return [
+        { id: "ataques",       label: "Ataques",            action: "ATTACK", op: "count" },
+        { id: "aciertos",      label: "Golpes acertados",   action: "ATTACK", where: { hit: true }, op: "count" },
+        { id: "precision",     label: "% acierto",          op: "pct", of: "aciertos", over: "ataques" },
+        { id: "dano",          label: "Daño causado",       action: "ATTACK", field: "damage", op: "sum", record: "max" },
+        { id: "dano_recibido", label: "Daño recibido",      action: "ATTACK", field: "damage", player: "targetId", op: "sum" },
+        { id: "patadas",       label: "Patadas",            action: "ATTACK", where: { attack: "patada" }, op: "count" },
+        { id: "bloqueados",    label: "Golpes que le bloquearon", action: "ATTACK", where: { blocked: true }, op: "count" },
+        { id: "rondas",        label: "Rondas ganadas",     action: "ROUND_END", player: "winnerId", op: "count" },
+        { id: "decisiones_ia", label: "Decisiones de la IA (Prolog)", action: "AI_DECISION", field: "decision", op: "countBy", scope: "match" }
+      ];
+    }
+
     _nuevaRonda(anterior) {
       this.ronda++;
       this.luchadores.forEach(function (l) { l.reiniciar(); });
@@ -117,7 +132,9 @@
       var campeon = L.find(function (l) { return l.rondasGanadas >= RONDAS_PARA_GANAR; });
       if (campeon) {
         this.mensaje = "🏆 ¡" + campeon.nombre + " gana el combate!";
-        this.terminar(campeon.id, { rounds: this.ronda, score: L[0].rondasGanadas + "-" + L[1].rondasGanadas });
+        var rondas = {};
+        L.forEach(function (l) { rondas[l.id] = l.rondasGanadas; });
+        this.terminar(campeon.id, { rounds: this.ronda, scores: rondas, score: L[0].rondasGanadas + "-" + L[1].rondasGanadas });
         return;
       }
       var texto = ganador ? (motivo === "ko" ? "¡KO! " : "¡Tiempo! ") + ganador.nombre + " gana la ronda" : "Ronda empatada";

@@ -152,7 +152,12 @@
       this.jugadores = jugadores;
       this.estado = "jugando";
       this._inicio = Date.now();
-      this.sistema("MATCH_STARTED", null, { players: jugadores.map(function (j) { return j.id; }), mode: modo || "2-jugadores" });
+      // El juego DECLARA sus estadísticas: GameStats las calcula sin conocer el juego (dinámico).
+      this.sistema("MATCH_STARTED", null, {
+        players: jugadores.map(function (j) { return j.id; }),
+        mode: modo || "2-jugadores",
+        metrics: this.estadisticas()
+      });
       var self = this;
       jugadores.forEach(function (j) { self.sistema("PLAYER_JOINED", j.id, { name: j.nombre }); });
       this.alIniciar();                                  // paso propio de cada juego
@@ -198,6 +203,20 @@
     // Pasos que cada juego DEBE / PUEDE redefinir
     alIniciar() { throw new Error("Cada juego debe implementar alIniciar()"); }
     alTerminar() {}
+
+    /*
+     * Estadísticas ESPECÍFICAS del juego, declaradas como datos (no como código).
+     * GameStats las interpreta con un analizador genérico, así que un juego nuevo trae
+     * las suyas sin que haya que tocar ni recompilar GameStats. Cada una es:
+     *   { id, label, op, action?, where?, field?, player?, of?, over?, scope?, record? }
+     *   op: count | sum | max | min | avg | last | pct | countBy
+     *   player: campo de data que dice a quién se le cuenta (por defecto, el playerId)
+     *   scope: "player" (por jugador) o "match" (de la partida)
+     *   record: "max" | "min" → GameStats guarda el mejor valor como récord
+     * Las estadísticas GENERALES (ganador, victorias, récords, tiempo) salen solas del
+     * contrato común: MATCH_FINISHED.data.winner y MATCH_FINISHED.data.scores.
+     */
+    estadisticas() { return []; }
   }
 
   if (EN_CONSOLA) global.document.documentElement.classList.add("en-consola");

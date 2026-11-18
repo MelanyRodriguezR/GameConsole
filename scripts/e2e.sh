@@ -48,6 +48,22 @@ for _ in $(seq 60); do
 done
 [ "$LISTO" = "si" ] || { echo "✖ el panel no muestra partidas de los 3 juegos"; curl -s "$CONSOLA/api/panel"; exit 1; }
 
+echo "▶ 5. Estadísticas dinámicas: récords y tabla de posiciones, incluso de un juego que GameStats no conoce"
+curl -fs "$CONSOLA/api/panel" | node -e '
+  let s=""; process.stdin.on("data",d=>s+=d).on("end",()=>{
+    const p=JSON.parse(s), c=p.porJuego.combate;
+    if (!c.records.length || !c.leaderboard.length || c.leaderboard[0].totals.aciertos === undefined)
+      { console.error("✖ combate sin récords o sin sus estadísticas declaradas"); process.exit(1); }
+    console.log("   combate: líder", c.leaderboard[0].playerId, "· récords:", c.records.map(r=>r.record).join(", "));
+  })'
+for _ in $(seq 15); do curl -fs "$CONSOLA/api/results/games/dardos" | grep -q '"leaderboard":\[{' && break; sleep 1; done
+curl -fs "$CONSOLA/api/results/games/dardos" | node -e '
+  let s=""; process.stdin.on("data",d=>s+=d).on("end",()=>{
+    const g=JSON.parse(s), l=g.leaderboard[0];
+    if (!l || l.playerId!=="eva" || l.totals.dianas!==1) { console.error("✖ el juego inventado no tiene sus estadísticas", s); process.exit(1); }
+    console.log("   dardos (juego inventado): líder", l.playerId, "· dianas", l.totals.dianas, "· récords:", g.records.length);
+  })'
+
 STATS=$(curl -fs "$INGEST/stats")
 echo "   ingest: $STATS"
 echo "$STATS" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const x=JSON.parse(s); if(x.rejected!==0||x.valid<1){console.error("✖ hubo eventos rechazados");process.exit(1)}})'

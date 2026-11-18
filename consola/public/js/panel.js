@@ -16,16 +16,15 @@ const fmtSeg = (s) => {
   return s < 60 ? s.toFixed(1) + " s" : Math.floor(s / 60) + " min " + Math.round(s % 60) + " s";
 };
 const hora = (t) => (t ? new Date(t).toLocaleTimeString() : "—");
-// Nombres en español de los campos que manda GameStats (solo traduce, no calcula nada).
-const NOMBRES = {
-  matches: "partidas", wins: "victorias", winPct: "% victorias", winsVsComputer: "victorias vs IA",
-  hits: "golpes acertados", accuracyPct: "% acierto", damageDealt: "daño causado",
-  bestDamageInMatch: "récord daño", perfectRounds: "rondas perfectas",
-  bestScore: "récord puntos", avgScore: "promedio puntos", stars: "⭐", golden: "🌟", bombs: "💣",
-  draws: "empates", bestAttempts: "récord (menos intentos)", avgAttempts: "promedio intentos",
-  wastedGuesses: "intentos desperdiciados",
+// Nombres de las estadísticas GENERALES (son iguales para cualquier juego: vienen del contrato común).
+// Los nombres de las estadísticas ESPECÍFICAS los declara cada juego y llegan desde GameStats ("labels").
+const GENERALES = {
+  matches: "partidas", wins: "victorias", draws: "empates", losses: "derrotas",
+  winPct: "% victorias", bestScore: "mejor puntaje", avgScore: "puntaje promedio",
 };
-const etiqueta = (clave) => NOMBRES[clave] || clave.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/_/g, " ").toLowerCase();
+const etiqueta = (clave, labels = {}) =>
+  labels[clave] || GENERALES[clave] || clave.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/_/g, " ").toLowerCase();
+const numero = (v) => (typeof v === "number" ? +v.toFixed(2) : v ?? "—");
 
 export class PanelEstadisticas {
   #timer = null;
@@ -47,6 +46,7 @@ export class PanelEstadisticas {
     try {
       const datos = await pedirJSON("/api/panel");
       this.#generales(datos);
+      this.#recordsGenerales(datos.general.juegos);
       this.#enCurso(datos.enCurso);
       this.#porJuego(datos);
       this.#ultimas(datos.general.partidas);
@@ -84,6 +84,14 @@ export class PanelEstadisticas {
           crear("div", { class: "valor", text: valor }), crear("div", { class: "nombre", text: nombre }));
       }),
     );
+  }
+
+  // ---------- récords de todos los juegos (solo junta las listas que ya calculó GameStats) ----------
+  #recordsGenerales(juegos) {
+    const cont = $("#records-generales");
+    const filas = (juegos || []).flatMap((g) => (g.records || []).map((r) => ({ ...r, gameId: g.gameId })));
+    if (!filas.length) return cont.replaceChildren(crear("p", { class: "vacio", text: "Todavía no hay récords: juega una partida hasta el final." }));
+    cont.replaceChildren(this.#tablaRecords(filas, true));
   }
 
   // ---------- en curso ----------
@@ -127,8 +135,12 @@ export class PanelEstadisticas {
       if (r.byStatus && Object.keys(r.byStatus).length) {
         ficha.append(crear("h4", { text: "Partidas por estado" }), this.#tablaConteo(r.byStatus));
       }
+      if (r.records && r.records.length) {
+        ficha.append(crear("h4", { text: "🏆 Récords" }), this.#tablaRecords(r.records));
+      }
       if (r.leaderboard && r.leaderboard.length) {
-        ficha.append(crear("h4", { text: "🏆 Récords (tabla de posiciones de GameStats)" }), this.#tablaPosiciones(r.leaderboard));
+        ficha.append(crear("h4", { text: "Tabla de posiciones (generales + específicas del juego)" }),
+          this.#tablaPosiciones(r.leaderboard, r.labels || {}));
       }
       if (r.patternsByRule && Object.keys(r.patternsByRule).length) {
         ficha.append(crear("h4", { text: "Patrones detectados" }), this.#tablaConteo(r.patternsByRule));
@@ -148,18 +160,32 @@ export class PanelEstadisticas {
       )));
   }
 
-  // Las columnas salen de lo que mande GameStats: sirve para cualquier juego.
-  #tablaPosiciones(lista) {
-    const columnas = [...new Set(lista.flatMap((f) => Object.keys(f.totals || {})))];
+  // Las columnas y sus nombres salen de lo que mande GameStats: sirve para cualquier juego.
+  #tablaPosiciones(lista, labels) {
+    const orden = [...Object.keys(GENERALES), ...Object.keys(labels)];
+    const pos = (c) => (orden.indexOf(c) < 0 ? orden.length : orden.indexOf(c));
+    const columnas = [...new Set(lista.flatMap((f) => Object.keys(f.totals || {})))]
+      .filter((c) => lista.some((f) => typeof f.totals[c] !== "object" || f.totals[c] === null))
+      .sort((a, b) => pos(a) - pos(b));   // primero las generales, luego las del juego
     return crear("table", {},
       crear("tr", {}, crear("th", { text: "#" }), crear("th", { text: "Jugador" }),
-        ...columnas.map((c) => crear("th", { class: "num", text: etiqueta(c) }))),
+        ...columnas.map((c) => crear("th", { class: "num", text: etiqueta(c, labels) }))),
       ...lista.map((f, i) => crear("tr", {},
         crear("td", { text: i + 1 }), crear("td", { text: f.playerId }),
-        ...columnas.map((c) => {
-          const v = f.totals[c];
-          return crear("td", { class: "num", text: typeof v === "number" ? +v.toFixed(2) : v ?? "—" });
-        }))));
+        ...columnas.map((c) => crear("td", { class: "num", text: numero(f.totals[c]) })))));
+  }
+
+  // Récords tal como los calcula GameStats: { record, value, unit, playerId, matchId }
+  #tablaRecords(lista, conJuego = false) {
+    return crear("table", {},
+      crear("tr", {}, ...(conJuego ? ["Juego"] : []).concat(["Récord", "Valor", "Quién", "Partida"]).map((t) => crear("th", { text: t }))),
+      ...lista.map((r) => crear("tr", {},
+        ...(conJuego ? [crear("td", { text: this.#nombreJuego(r.gameId) })] : []),
+        crear("td", { text: r.record }),
+        crear("td", { class: "num", text: numero(r.value) + (r.unit ? " " + r.unit : "") }),
+        crear("td", { text: r.playerId ?? "—" }),
+        crear("td", { text: r.matchId, style: "font: 11px Consolas, monospace" }),
+      )));
   }
 
   // ---------- últimas ----------

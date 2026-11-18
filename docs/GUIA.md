@@ -137,28 +137,44 @@ cd consola && INGEST_URL=https://gamestats-ingest.onrender.com ANALYTICS_URL=htt
 |---|---|
 | Consola **dinámica** (juegos nuevos sin recompilar) | ✅ el servidor no tiene ninguna lista de juegos: lee la carpeta en cada consulta |
 | Dos acciones: **jugar** (y en paralelo) y **ver estadísticas** | ✅ las dos pestañas de la consola |
-| Estadísticas **generales**: veces jugado, **récords**, tiempo promedio | ✅ veces jugado · tiempo promedio · ganador · tabla de récords (observación A) |
-| Estadísticas **específicas** por juego | ✅ cada juego tiene las suyas (observación A) |
+| Estadísticas **generales**: veces jugado, **récords**, tiempo promedio | ✅ para **cualquier** juego, sin configurarlo (observación A) |
+| Estadísticas **específicas** por juego | ✅ cada juego las **declara**; GameStats las calcula sin conocerlo (observación A) |
 | Muchos patrones de diseño (6–8) | ✅ 10: Registry, Singleton, Factory, Template Method, Observer, Strategy, Adapter, Facade+Proxy, Mediator, State |
 | JavaScript | ✅ |
 | Juegos como proyectos aparte | ✅ cada carpeta de `juegos/` funciona sola |
 
-### Observación A — récords y estadísticas específicas (✅ resuelto, falta publicarlo)
+### Observación A — récords y estadísticas, de forma DINÁMICA (✅ resuelto, falta publicarlo)
 
-Antes, GameStats solo tenía analizadores para los juegos del Proyecto 1 y para los nuestros devolvía `winner: null` y la
-tabla de posiciones vacía. Se resolvió **en GameStats**, sin que el panel calcule nada. El cambio está en la copia local
-`C:\Users\melan\Downloads\GameStats`, rama **`juegos-gameconsole`**, y sus 22 pruebas pasan:
+Antes, GameStats solo sabía analizar los juegos del Proyecto 1. Para cualquier otro devolvía `winner: null` y la tabla
+de posiciones vacía. **No** se resolvió escribiendo un analizador por juego, porque eso obligaría a recompilar GameStats
+cada vez que llega un juego nuevo. Se resolvió con **un solo analizador dinámico** que sirve para cualquier juego:
 
-| Archivo nuevo | Qué hace |
+```
+ juego ──MATCH_STARTED { metrics: [ qué medir ] }──► GameStats: DynamicAnalyzer ──► panel (solo muestra)
+       ──eventos de la partida ─────────────────────►     (lee la declaración y la aplica)
+       ──MATCH_FINISHED { winner, scores } ──────────►
+```
+
+1. **Generales (para todos los juegos, sin configurar nada):** con `winner` y `scores` de `MATCH_FINISHED`, GameStats
+   calcula partidas, victorias, empates, derrotas, % de victorias, mejor puntaje y puntaje promedio, y los **récords
+   generales**: puntaje más alto, más victorias, victoria más rápida y partida más larga.
+2. **Específicas (las declara el juego):** cada juego tiene un método `estadisticas()` que devuelve una lista como
+   `{ id: "aciertos", label: "Golpes acertados", action: "ATTACK", where: { hit: true }, op: "count" }`.
+   `JuegoBase` la manda sola en `MATCH_STARTED`, y GameStats la calcula y también arma con ella la tabla de posiciones.
+   Las que llevan `record: "max"` o `"min"` aparecen como **récords** del juego.
+
+| Dónde | Qué cambió |
 |---|---|
-| `games/combate.json`, `games/atrapar.json`, `games/adivinanza.json` | ingest valida las acciones y los campos de cada juego |
-| `CombateAnalyzer.scala` | ganador, % de acierto, daño causado y recibido, rondas perfectas, victorias contra la IA, decisiones de Prolog · patrones `RONDA_PERFECTA`, `GANA_LA_IA` |
-| `AtraparAnalyzer.scala` | ganador, **récord de puntos**, ⭐/🌟/💣 atrapadas, costo de las bombas · patrón `RACHA_DORADA` |
-| `AdivinanzaAnalyzer.scala` | ganador, empates, **récord de menos intentos**, intentos desperdiciados · patrón `ADIVINO_RAPIDO` |
-| `GameConsoleSuite.scala` | 5 pruebas nuevas |
+| GameStats `analytics/.../DynamicAnalyzer.scala` (nuevo) | El analizador genérico: entiende `count`, `sum`, `max`, `min`, `avg`, `last`, `pct` y `countBy`. |
+| GameStats `GameAnalyzer.scala` | Los juegos del Proyecto 1 siguen con su analizador; **cualquier otro** usa el dinámico. |
+| GameStats `store/Queries.scala` | Agrega `records` (récords) y `labels` (nombres que dio el juego) al resumen de cada juego. |
+| GameStats `DynamicSuite.scala` (nuevo) | 4 pruebas con juegos **inventados** ("dardos", "ajedrez"). Todo GameStats pasa 21 de 21 pruebas. |
+| `juegos/*/js/gamestats.js` | `JuegoBase` manda `metrics: this.estadisticas()` en `MATCH_STARTED`. |
+| `juegos/*/js/<juego>.js` | Cada juego declara sus estadísticas en `estadisticas()`. El combate también manda `scores`. |
+| `consola/public/js/panel.js` | Muestra los récords (por juego y de todos los juegos) con los nombres que manda GameStats. **No calcula nada.** |
 
-En el panel, cada juego muestra ahora **🏆 Récords**, con su tabla de posiciones y sus columnas propias, además del
-**ganador** de cada partida y los **patrones detectados**.
+**Prueba de que es dinámico:** `scripts/partidas-demo.js` también manda partidas de **"dardos"**, un juego que no
+existe ni en la consola ni en GameStats, y GameStats igual le calcula ganador, tabla de posiciones, dianas y récords.
 
 **Para probarlo hoy** (con la copia local de GameStats):
 ```bash
@@ -174,7 +190,7 @@ cd C:\Users\melan\Downloads\GameStats
 git push -u origin juegos-gameconsole
 ```
 Luego, en GitHub, abrir un *Pull Request* de `juegos-gameconsole` hacia `main` y aceptarlo (*Merge*). Con eso:
-- Render vuelve a desplegar GameStats solo, con los analizadores nuevos.
+- Render vuelve a desplegar GameStats solo, ya con el analizador dinámico.
 - El `docker compose up --build` normal (sin `GAMESTATS_CONTEXT`) ya los incluye.
 
 ---
@@ -185,7 +201,7 @@ Luego, en GitHub, abrir un *Pull Request* de `juegos-gameconsole` hacia `main` y
 |---|---|---|---|
 | 1 | **Subir a GitHub** | tú | Crear un repo vacío en github.com (por ejemplo `GameConsole`, **público**), y luego: `git remote add origin https://github.com/<usuario>/GameConsole.git` y `git push -u origin main` |
 | 2 | **Revisar el CI** | tú + Claude | En GitHub → pestaña *Actions*: los 4 trabajos deben quedar en verde. Si alguno falla, copiar el error y lo arreglamos. |
-| 3 | **Publicar los analizadores de GameStats** | Mauro (o tú) | Push de la rama `juegos-gameconsole` + Pull Request + Merge (observación A) |
+| 3 | **Publicar el analizador dinámico de GameStats** | Mauro (o tú) | Push de la rama `juegos-gameconsole` + Pull Request + Merge (observación A) |
 | 4 | **Deploy en Render** | tú | render.com → *New* → *Blueprint* → elegir el repo. Crea `gameconsole` y `gameconsole-prolog`. Si Render les pone otro nombre, cambiar `PROLOG_URL` en `render.yaml`. |
 | 5 | **Probar en Render** | tú | Abrir las 4 URLs del README (se duermen tras 15 min: esperar ~1 min la primera vez). |
 | 6 | **Borrar `juegos-viejos/`** | tú | Ya no se usa y no está en git; se puede borrar a mano. |

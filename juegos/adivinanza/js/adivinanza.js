@@ -28,6 +28,17 @@
 
     alTerminar() {}
 
+    // Lo que GameStats debe medir de este juego.
+    estadisticas() {
+      return [
+        { id: "intentos",   label: "Intentos",               action: "GUESS", op: "count" },
+        { id: "para_ganar", label: "Intentos para adivinar", action: "GUESS", where: { result: "correct" }, field: "attempt", op: "min", record: "min" },
+        { id: "mayor",      label: "Pistas \"es MAYOR\"",    action: "GUESS", where: { result: "higher" }, op: "count" },
+        { id: "menor",      label: "Pistas \"es MENOR\"",    action: "GUESS", where: { result: "lower" }, op: "count" },
+        { id: "pistas",     label: "Pistas de la partida",   action: "GUESS", field: "result", op: "countBy", scope: "match" }
+      ];
+    }
+
     cambiarFase(fase) {
       this.fase = fase;
       this.emitir("cambio", { error: null });

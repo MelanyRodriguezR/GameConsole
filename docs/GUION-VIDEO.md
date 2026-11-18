@@ -12,7 +12,7 @@ Tener abiertas la consola (http://localhost:3000) y esta guía.
 | 7:30 – 8:30 | ⭐ **Atrapa Estrellas** | Polimorfismo (estrella, dorada, bomba) y Factory. |
 | 8:30 – 9:30 | 🔢 **Adivina el Número** | Patrón State (fases), secreto privado `#secreto`. |
 | 9:30 – 11:00 | **Partidas en paralelo** | Abrir 3 partidas a la vez en la consola y una en **pestaña nueva**. Cada una tiene su `matchId`. Mostrar `http://localhost:8080/matches` (ingest) con varias partidas en curso a la vez. |
-| 11:00 – 12:30 | 📊 **Panel** | Estadísticas generales (partidas, jugadores, eventos) y por juego (veces jugado, tiempo promedio, tabla de posiciones, partidas en curso). Se actualiza solo cada 3 s. Recalcar: **el panel no calcula, todo viene de GameStats**. |
+| 11:00 – 12:30 | 📊 **Panel** | Estadísticas generales (partidas, jugadores, eventos), **🏆 récords de todos los juegos** y, por juego, veces jugado, tiempo promedio, récords, tabla de posiciones y partidas en curso. Se actualiza solo cada 3 s. Recalcar: **el panel no calcula, todo viene de GameStats**. Mostrar el método `estadisticas()` de un juego: el juego **declara** qué medir y GameStats lo calcula con un solo analizador dinámico; "dardos" (de `partidas-demo.js`) es un juego que GameStats nunca vio y aun así tiene récords. |
 | 12:30 – 14:00 | **Código y patrones** | Recorrer rápido la tabla de patrones del README señalando el archivo de cada uno. |
 | 14:00 – 15:00 | **DevOps** | GitHub Actions en verde (pruebas, imágenes, prueba integrada), `docker-compose.yml`, `render.yaml` y la consola funcionando en Render. |
 
