@@ -8,7 +8,8 @@
 #   ingest     (GameStats, Go)     http://localhost:8080   recibe los eventos
 #   analytics  (GameStats, Scala)  http://localhost:9000   calcula las estadísticas
 #
-# ingest y analytics son las imágenes que publica el CI del Proyecto 1 (GameStats) en GHCR.
+# ingest y analytics se construyen desde el código del Proyecto 1 (github.com/mauroza/GameStats).
+# La primera vez tarda varios minutos (compila Go y Scala); después queda en caché.
 # La carpeta ./juegos se monta en la consola: si copias ahí un juego nuevo con su
 # manifest.json, aparece en la consola en unos segundos SIN reiniciar nada.
 
@@ -34,8 +35,11 @@ services:
     ports: ["8081:8081"]
     restart: unless-stopped
 
+  # GameStats se construye desde su repositorio público (las imágenes de GHCR son privadas).
   ingest:
-    image: ghcr.io/mauroza/gamestats-ingest:${GAMESTATS_TAG:-latest}
+    build:
+      context: https://github.com/mauroza/GameStats.git#${GAMESTATS_REF:-main}
+      dockerfile: ingest/Dockerfile
     ports: ["8080:8080"]
     environment:
       ANALYTICS_URL: http://analytics:9000/matches
@@ -46,7 +50,9 @@ services:
     restart: unless-stopped
 
   analytics:
-    image: ghcr.io/mauroza/gamestats-analytics:${GAMESTATS_TAG:-latest}
+    build:
+      context: https://github.com/mauroza/GameStats.git#${GAMESTATS_REF:-main}
+      dockerfile: analytics/Dockerfile
     ports: ["9000:9000"]
     environment:
       JAVA_TOOL_OPTIONS: -Xmx512m -XX:+UseSerialGC

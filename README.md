@@ -64,8 +64,8 @@ render.yaml         deploy en Render
 docker compose up --build
 ```
 
-Abrir http://localhost:3000. Levanta la consola, Prolog y GameStats (ingest + analytics, con las imágenes que publica el
-CI del Proyecto 1). La carpeta `juegos/` está montada: si copias ahí un juego nuevo, aparece en la consola sin reiniciar.
+Abrir http://localhost:3000. Levanta la consola, Prolog y GameStats (ingest + analytics, que se construyen desde el
+repositorio público del Proyecto 1; la primera vez tarda varios minutos). La carpeta `juegos/` está montada: si copias ahí un juego nuevo, aparece en la consola sin reiniciar.
 
 Prueba integrada (la misma que corre el CI):
 
