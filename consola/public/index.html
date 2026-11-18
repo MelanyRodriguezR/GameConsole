@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GameConsole</title>
+  <link rel="stylesheet" href="css/consola.css">
+</head>
+<body>
+  <header class="barra">
+    <h1>🕹️ GameConsole</h1>
+    <nav>
+      <button class="pestana activa" data-vista="jugar">▶ Jugar</button>
+      <button class="pestana" data-vista="estadisticas">📊 Estadísticas</button>
+    </nav>
+    <div id="salud" class="salud" title="Estado de los servicios"></div>
+  </header>
+
+  <!-- ===================== 1) JUGAR ===================== -->
+  <section id="vista-jugar" class="vista">
+    <div class="bloque">
+      <div class="titulo-bloque">
+        <h2>Juegos disponibles</h2>
+        <small id="catalogo-info">Cargando catálogo…</small>
+      </div>
+      <div id="catalogo" class="catalogo"></div>
+      <details class="agregar">
+        <summary>➕ Agregar un juego nuevo (sin reiniciar la consola)</summary>
+        <p>
+          Opción 1: copia la carpeta del juego (con su <code>manifest.json</code>) dentro de la carpeta
+          <code>juegos/</code>. Aparece aquí solo, en pocos segundos.<br>
+          Opción 2: pega la URL del <code>manifest.json</code> de un juego publicado en otro sitio:
+        </p>
+        <form id="form-externo">
+          <input id="url-externo" type="url" required placeholder="https://mi-juego.com/manifest.json">
+          <button type="submit">Agregar</button>
+        </form>
+        <div id="externo-msj" class="mensaje"></div>
+        <ul id="problemas" class="problemas"></ul>
+      </details>
+    </div>
+
+    <div class="bloque">
+      <div class="titulo-bloque">
+        <h2>Partidas abiertas <span id="num-partidas" class="chip">0</span></h2>
+        <small>Cada partida corre por su cuenta y tiene su propio <code>matchId</code>. Haz clic dentro de una para jugarla.</small>
+      </div>
+      <div id="partidas" class="partidas">
+        <p class="vacio">Todavía no hay partidas. Elige un juego arriba y presiona <b>Jugar aquí</b>.
+          Puedes abrir varias a la vez, o abrir una en otra pestaña del navegador.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 2) ESTADÍSTICAS ===================== -->
+  <section id="vista-estadisticas" class="vista oculta">
+    <div class="bloque">
+      <div class="titulo-bloque">
+        <h2>Estadísticas generales</h2>
+        <small id="panel-info">Todo lo que se ve aquí lo calcula GameStats; la consola solo lo muestra.</small>
+      </div>
+      <div id="generales" class="tarjetas"></div>
+    </div>
+
+    <div class="bloque">
+      <div class="titulo-bloque">
+        <h2>Partidas en curso ahora</h2>
+        <small>Según GameStats ingest (se actualiza cada 3 s)</small>
+      </div>
+      <div id="en-curso"></div>
+    </div>
+
+    <div class="bloque">
+      <div class="titulo-bloque">
+        <h2>Estadísticas por juego</h2>
+        <small>Resultados de GameStats analytics para cada juego del catálogo</small>
+      </div>
+      <div id="por-juego" class="por-juego"></div>
+    </div>
+
+    <div class="bloque">
+      <div class="titulo-bloque">
+        <h2>Últimas partidas terminadas</h2>
+      </div>
+      <div id="ultimas"></div>
+    </div>
+  </section>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

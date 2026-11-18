@@ -1,0 +1,92 @@
+:root {
+  --fondo: #12141c; --panel: #1b1e2b; --panel2: #232738; --borde: #2f3450;
+  --texto: #e8e9f0; --suave: #9aa0b8; --acento: #5b6cff; --acento2: #4a5af0;
+  --ok: #81c784; --aviso: #ffb74d; --malo: #e57373;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: var(--fondo); color: var(--texto); }
+code { background: var(--panel2); padding: 1px 5px; border-radius: 4px; font-size: .9em; }
+button { font: inherit; cursor: pointer; border: 0; border-radius: 6px; padding: 8px 14px; background: var(--acento); color: #fff; font-weight: 600; }
+button:hover { background: var(--acento2); }
+button.secundario { background: var(--panel2); color: var(--texto); }
+button.secundario:hover { background: var(--borde); }
+input { font: inherit; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--borde); background: #0e1018; color: var(--texto); }
+
+/* barra superior */
+.barra { display: flex; align-items: center; gap: 18px; padding: 10px 20px; background: var(--panel); border-bottom: 1px solid var(--borde); flex-wrap: wrap; position: sticky; top: 0; z-index: 5; }
+.barra h1 { margin: 0; font-size: 21px; }
+.barra nav { display: flex; gap: 6px; }
+.pestana { background: transparent; color: var(--suave); }
+.pestana.activa { background: var(--acento); color: #fff; }
+.salud { margin-left: auto; display: flex; gap: 10px; font-size: 12px; color: var(--suave); flex-wrap: wrap; }
+.salud span::before { content: "●"; margin-right: 4px; color: var(--malo); }
+.salud span.ok::before { color: var(--ok); }
+
+.vista { padding: 16px 20px 40px; max-width: 1500px; margin: 0 auto; }
+.oculta { display: none; }
+.bloque { margin-bottom: 26px; }
+.titulo-bloque { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.titulo-bloque h2 { margin: 0; font-size: 18px; }
+.titulo-bloque small { color: var(--suave); }
+.chip { display: inline-block; min-width: 24px; padding: 1px 8px; border-radius: 12px; background: var(--acento); font-size: 13px; text-align: center; }
+.vacio { color: var(--suave); background: var(--panel); padding: 18px; border-radius: 8px; }
+
+/* catálogo */
+.catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.juego { background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.juego.nuevo { animation: brillo 2s ease-out; }
+@keyframes brillo { from { border-color: var(--ok); box-shadow: 0 0 0 3px #81c78455; } }
+.juego h3 { margin: 0; font-size: 17px; }
+.juego p { margin: 0; color: var(--suave); font-size: 13px; flex: 1; }
+.juego .etiquetas { display: flex; gap: 6px; flex-wrap: wrap; }
+.juego .etiquetas span { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: var(--panel2); color: var(--suave); }
+.juego .etiquetas span.ia { background: #3b2f5c; color: #d1c4ff; }
+.juego .botones { display: flex; gap: 6px; flex-wrap: wrap; }
+.juego .botones button { flex: 1; padding: 7px 8px; font-size: 13px; }
+
+.agregar { margin-top: 12px; background: var(--panel); border-radius: 8px; padding: 10px 14px; }
+.agregar summary { cursor: pointer; color: var(--suave); }
+.agregar p { font-size: 13px; color: var(--suave); }
+#form-externo { display: flex; gap: 8px; }
+#form-externo input { flex: 1; }
+.mensaje { font-size: 13px; margin-top: 6px; }
+.mensaje.ok { color: var(--ok); } .mensaje.error { color: var(--malo); }
+.problemas { font-size: 12px; color: var(--aviso); }
+
+/* partidas (instancias) */
+.partidas { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 640px), 1fr)); gap: 14px; }
+.partida { background: var(--panel); border: 2px solid var(--borde); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
+.partida.enfocada { border-color: var(--acento); }
+.partida.grande { grid-column: 1 / -1; }
+.partida header { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--panel2); flex-wrap: wrap; }
+.partida header b { font-size: 14px; }
+.partida header .estado { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: var(--borde); color: var(--suave); }
+.partida header .estado.jugando { background: #1f4d2c; color: var(--ok); }
+.partida header .estado.terminado { background: #4d3b1f; color: var(--aviso); }
+.partida header .match { font: 11px Consolas, monospace; color: var(--suave); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 80px; }
+.partida header button { padding: 4px 9px; font-size: 12px; }
+.partida iframe { width: 100%; height: 640px; border: 0; background: #0c0e15; }
+.partida.grande iframe { height: 760px; }
+
+/* panel */
+.tarjetas { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+.tarjeta { background: var(--panel); border-radius: 10px; padding: 12px 14px; }
+.tarjeta .valor { font-size: 28px; font-weight: 700; }
+.tarjeta .nombre { font-size: 12px; color: var(--suave); }
+.tarjeta.cambio .valor { animation: destello 1s; }
+@keyframes destello { from { color: var(--ok); } }
+.por-juego { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 12px; }
+.ficha { background: var(--panel); border-radius: 10px; padding: 14px; }
+.ficha h3 { margin: 0 0 10px; }
+.ficha .mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+.ficha .mini div { background: var(--panel2); border-radius: 8px; padding: 8px; }
+.ficha .mini b { display: block; font-size: 20px; }
+.ficha .mini span { font-size: 11px; color: var(--suave); }
+.ficha h4 { margin: 12px 0 6px; font-size: 13px; color: var(--suave); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--borde); }
+th { color: var(--suave); font-weight: 600; font-size: 12px; }
+td.num, th.num { text-align: right; }
+.barra-h { height: 8px; background: var(--acento); border-radius: 4px; }
+.nota { font-size: 12px; color: var(--suave); }
+.error-panel { color: var(--aviso); background: #3a2d17; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; }

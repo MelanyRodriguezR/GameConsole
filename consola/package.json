@@ -1,0 +1,13 @@
+{
+  "name": "gameconsole",
+  "version": "1.0.0",
+  "description": "Consola web de videojuegos que carga juegos de forma dinámica y se integra con GameStats",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}

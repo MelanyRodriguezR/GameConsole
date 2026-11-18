@@ -1,0 +1,11 @@
+{
+  "id": "combate",
+  "nombre": "Combate",
+  "version": "1.1",
+  "icono": "🥊",
+  "descripcion": "Dos luchadores se mueven, saltan, golpean, patean y bloquean. Gana quien gane 2 rondas. Se puede jugar contra la computadora, que decide con Prolog.",
+  "entrada": "index.html",
+  "jugadores": 2,
+  "modos": ["2-jugadores", "vs-computadora"],
+  "eventos": ["ATTACK", "ROUND_END", "AI_DECISION", "PLAYER_WON", "PLAYER_LOST"]
+}
