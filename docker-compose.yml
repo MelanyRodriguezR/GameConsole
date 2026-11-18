@@ -38,7 +38,7 @@ services:
   # GameStats se construye desde su repositorio público (las imágenes de GHCR son privadas).
   ingest:
     build:
-      context: https://github.com/mauroza/GameStats.git#${GAMESTATS_REF:-main}
+      context: ${GAMESTATS_CONTEXT:-https://github.com/mauroza/GameStats.git#main}
       dockerfile: ingest/Dockerfile
     ports: ["8080:8080"]
     environment:
@@ -51,7 +51,7 @@ services:
 
   analytics:
     build:
-      context: https://github.com/mauroza/GameStats.git#${GAMESTATS_REF:-main}
+      context: ${GAMESTATS_CONTEXT:-https://github.com/mauroza/GameStats.git#main}
       dockerfile: analytics/Dockerfile
     ports: ["9000:9000"]
     environment:

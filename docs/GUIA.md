@@ -122,10 +122,10 @@ cd consola && INGEST_URL=https://gamestats-ingest.onrender.com ANALYTICS_URL=htt
 | 4 | Un juego contra la computadora con Prolog | ✅ | Combate vs-computadora + `prolog/combate.pl` |
 | 5 | Eventos de inicio, desarrollo y fin | ✅ | `MATCH_STARTED`, `ATTACK`, `ITEM_CAUGHT`, `GUESS`, `AI_DECISION`, `MATCH_FINISHED`… |
 | 6 | Eventos compatibles con GameStats, envíos concurrentes | ✅ | prueba integrada: 0 rechazados |
-| 7 | Panel con estadísticas por juego y generales de GameStats | ⚠️ parcial | ver la observación A |
+| 7 | Panel con estadísticas por juego y generales de GameStats | ✅ (con la rama nueva de GameStats) | ver la observación A |
 | 8 | Cantidad de instancias por juego, actualizada en vivo | ✅ | "veces jugado" e "instancias en curso ahora" |
 | 9 | Instalación, ejecución y deployment reproducibles | ⚠️ | Docker ✅ probado · falta subir a GitHub y desplegar en Render |
-| — | Repositorio Git con historial | ⚠️ | hay 5 commits locales; **falta subirlo a GitHub** |
+| — | Repositorio Git con historial | ⚠️ | hay commits locales; **falta subirlo a GitHub** |
 | — | Docker (consola + Prolog + GameStats) | ✅ probado | `docker-compose.yml` |
 | — | Pipeline CI/CD | ⚠️ | escrito; corre cuando el repo esté en GitHub |
 | — | Documentación breve | ✅ | `README.md` |
@@ -137,26 +137,45 @@ cd consola && INGEST_URL=https://gamestats-ingest.onrender.com ANALYTICS_URL=htt
 |---|---|
 | Consola **dinámica** (juegos nuevos sin recompilar) | ✅ el servidor no tiene ninguna lista de juegos: lee la carpeta en cada consulta |
 | Dos acciones: **jugar** (y en paralelo) y **ver estadísticas** | ✅ las dos pestañas de la consola |
-| Estadísticas **generales**: veces jugado, **récords**, tiempo promedio | ⚠️ veces jugado ✅ · tiempo promedio ✅ · **récords ❌** (observación A) |
-| Estadísticas **específicas** por juego | ❌ (observación A) |
+| Estadísticas **generales**: veces jugado, **récords**, tiempo promedio | ✅ veces jugado · tiempo promedio · ganador · tabla de récords (observación A) |
+| Estadísticas **específicas** por juego | ✅ cada juego tiene las suyas (observación A) |
 | Muchos patrones de diseño (6–8) | ✅ 10: Registry, Singleton, Factory, Template Method, Observer, Strategy, Adapter, Facade+Proxy, Mediator, State |
 | JavaScript | ✅ |
 | Juegos como proyectos aparte | ✅ cada carpeta de `juegos/` funciona sola |
 
-### Observación A — faltan "récords" y estadísticas específicas
+### Observación A — récords y estadísticas específicas (✅ resuelto, falta publicarlo)
 
-GameStats solo tiene analizadores para sus juegos del Proyecto 1 (racing, combat y football). Para los juegos nuevos
-calcula lo genérico (partidas, duración y eventos), pero devuelve `winner: null` y la tabla de posiciones vacía.
-Como el panel **no puede calcular** por su cuenta (lo prohíbe el enunciado), la solución correcta es en **GameStats**:
+Antes, GameStats solo tenía analizadores para los juegos del Proyecto 1 y para los nuestros devolvía `winner: null` y la
+tabla de posiciones vacía. Se resolvió **en GameStats**, sin que el panel calcule nada. El cambio está en la copia local
+`C:\Users\melan\Downloads\GameStats`, rama **`juegos-gameconsole`**, y sus 22 pruebas pasan:
 
-1. En el repo de GameStats, agregar `games/combate.json`, `games/atrapar.json` y `games/adivinanza.json`, con las acciones y sus campos.
-2. Agregar en Scala tres analizadores (`CombateAnalyzer`, `AtraparAnalyzer`, `AdivinanzaAnalyzer`) que extiendan `GameAnalyzer`, y registrarlos en `Analyzers`. Así quedarían:
-   - **Combate:** ganador, % de golpes acertados, daño total, bloqueos y victorias contra la computadora.
-   - **Atrapa Estrellas:** ganador, puntaje récord, estrellas y bombas atrapadas.
-   - **Adivinanza:** ganador, menor cantidad de intentos (récord), empates.
-3. Subir esos cambios a `github.com/mauroza/GameStats`. El `docker-compose.yml` de este proyecto construye GameStats desde ahí, así que los toma solo.
+| Archivo nuevo | Qué hace |
+|---|---|
+| `games/combate.json`, `games/atrapar.json`, `games/adivinanza.json` | ingest valida las acciones y los campos de cada juego |
+| `CombateAnalyzer.scala` | ganador, % de acierto, daño causado y recibido, rondas perfectas, victorias contra la IA, decisiones de Prolog · patrones `RONDA_PERFECTA`, `GANA_LA_IA` |
+| `AtraparAnalyzer.scala` | ganador, **récord de puntos**, ⭐/🌟/💣 atrapadas, costo de las bombas · patrón `RACHA_DORADA` |
+| `AdivinanzaAnalyzer.scala` | ganador, empates, **récord de menos intentos**, intentos desperdiciados · patrón `ADIVINO_RAPIDO` |
+| `GameConsoleSuite.scala` | 5 pruebas nuevas |
 
-Esto se le puede pedir a Mauro (es su repositorio) o hacerlo juntos.
+En el panel, cada juego muestra ahora **🏆 Récords**, con su tabla de posiciones y sus columnas propias, además del
+**ganador** de cada partida y los **patrones detectados**.
+
+**Para probarlo hoy** (con la copia local de GameStats):
+```bash
+GAMESTATS_CONTEXT=../GameStats docker compose up --build
+```
+En PowerShell, primero `$env:GAMESTATS_CONTEXT="../GameStats"` y luego `docker compose up --build`.
+
+**Para que quede publicado** (lo hace Mauro, o tú si eres colaboradora del repo):
+```bash
+cd C:\Users\melan\Downloads\GameStats
+```
+```bash
+git push -u origin juegos-gameconsole
+```
+Luego, en GitHub, abrir un *Pull Request* de `juegos-gameconsole` hacia `main` y aceptarlo (*Merge*). Con eso:
+- Render vuelve a desplegar GameStats solo, con los analizadores nuevos.
+- El `docker compose up --build` normal (sin `GAMESTATS_CONTEXT`) ya los incluye.
 
 ---
 
@@ -166,7 +185,7 @@ Esto se le puede pedir a Mauro (es su repositorio) o hacerlo juntos.
 |---|---|---|---|
 | 1 | **Subir a GitHub** | tú | Crear un repo vacío en github.com (por ejemplo `GameConsole`, **público**), y luego: `git remote add origin https://github.com/<usuario>/GameConsole.git` y `git push -u origin main` |
 | 2 | **Revisar el CI** | tú + Claude | En GitHub → pestaña *Actions*: los 4 trabajos deben quedar en verde. Si alguno falla, copiar el error y lo arreglamos. |
-| 3 | **Récords y estadísticas específicas** | Mauro / Claude | Observación A |
+| 3 | **Publicar los analizadores de GameStats** | Mauro (o tú) | Push de la rama `juegos-gameconsole` + Pull Request + Merge (observación A) |
 | 4 | **Deploy en Render** | tú | render.com → *New* → *Blueprint* → elegir el repo. Crea `gameconsole` y `gameconsole-prolog`. Si Render les pone otro nombre, cambiar `PROLOG_URL` en `render.yaml`. |
 | 5 | **Probar en Render** | tú | Abrir las 4 URLs del README (se duermen tras 15 min: esperar ~1 min la primera vez). |
 | 6 | **Borrar `juegos-viejos/`** | tú | Ya no se usa y no está en git; se puede borrar a mano. |

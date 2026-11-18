@@ -16,7 +16,16 @@ const fmtSeg = (s) => {
   return s < 60 ? s.toFixed(1) + " s" : Math.floor(s / 60) + " min " + Math.round(s % 60) + " s";
 };
 const hora = (t) => (t ? new Date(t).toLocaleTimeString() : "—");
-const etiqueta = (clave) => clave.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/_/g, " ").toLowerCase();
+// Nombres en español de los campos que manda GameStats (solo traduce, no calcula nada).
+const NOMBRES = {
+  matches: "partidas", wins: "victorias", winPct: "% victorias", winsVsComputer: "victorias vs IA",
+  hits: "golpes acertados", accuracyPct: "% acierto", damageDealt: "daño causado",
+  bestDamageInMatch: "récord daño", perfectRounds: "rondas perfectas",
+  bestScore: "récord puntos", avgScore: "promedio puntos", stars: "⭐", golden: "🌟", bombs: "💣",
+  draws: "empates", bestAttempts: "récord (menos intentos)", avgAttempts: "promedio intentos",
+  wastedGuesses: "intentos desperdiciados",
+};
+const etiqueta = (clave) => NOMBRES[clave] || clave.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/_/g, " ").toLowerCase();
 
 export class PanelEstadisticas {
   #timer = null;

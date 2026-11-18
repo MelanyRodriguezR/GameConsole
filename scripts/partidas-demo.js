@@ -28,7 +28,7 @@ function partida(gameId, jugadores, jugadas, ganador) {
 
 const combate = partida("combate", ["ana", "computadora"], [
   ["ana", "ATTACK", { targetId: "computadora", attack: "golpe", hit: true, blocked: false, damage: 8, targetHp: 92, round: 1 }],
-  ["computadora", "AI_DECISION", { accion: "bloquear", razon: "el rival esta atacando de cerca: me cubro" }],
+  ["computadora", "AI_DECISION", { decision: "bloquear", reason: "el rival esta atacando de cerca: me cubro", engine: "swi-prolog", distance: 60, hp: 100, rivalHp: 92, round: 1 }],
   ["computadora", "ATTACK", { targetId: "ana", attack: "patada", hit: true, blocked: false, damage: 14, targetHp: 86, round: 1 }],
   ["computadora", "ROUND_END", { round: 1, winnerId: "computadora", reason: "ko", hp: { ana: 0, computadora: 40 } }],
   ["computadora", "ROUND_END", { round: 2, winnerId: "computadora", reason: "ko", hp: { ana: 0, computadora: 22 } }],
