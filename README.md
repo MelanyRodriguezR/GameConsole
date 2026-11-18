@@ -210,7 +210,6 @@ bash scripts/e2e.sh                                     # todo integrado (Docker
 | Pruebas | pruebas de la consola, revisión de los juegos (sintaxis y manifiestos) y pruebas de Prolog |
 | Imágenes | construye las imágenes Docker de la consola y de Prolog (que vuelven a correr sus pruebas) |
 | Prueba integrada | `scripts/e2e.sh`: `docker compose up` con GameStats, juega partidas de los 3 juegos en paralelo y revisa el panel |
-| Publicar | solo en `main`: sube `gameconsole-consola` y `gameconsole-prolog` a GHCR |
 
 **Deploy continuo:** Render está conectado al repositorio y redepliega en cada push a `main`.
 

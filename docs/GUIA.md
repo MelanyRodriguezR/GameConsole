@@ -193,8 +193,8 @@ existe ni en la consola ni en GameStats, y GameStats igual le calcula ganador, t
 
 | # | Tarea | Quién | Cómo |
 |---|---|---|---|
-| 1 | **Subir a GitHub** | tú | Crear un repo vacío en github.com (por ejemplo `GameConsole`, **público**), y luego: `git remote add origin https://github.com/<usuario>/GameConsole.git` y `git push -u origin main` |
-| 2 | **Revisar el CI** | tú + Claude | En GitHub → pestaña *Actions*: los 4 trabajos deben quedar en verde. Si alguno falla, copiar el error y lo arreglamos. |
+| 1 | **Subir a GitHub** | ✅ hecho | Crear un repo vacío en github.com (por ejemplo `GameConsole`, **público**), y luego: `git remote add origin https://github.com/<usuario>/GameConsole.git` y `git push -u origin main` |
+| 2 | **Revisar el CI** | ✅ | En GitHub → pestaña *Actions*: los 3 trabajos (pruebas, imágenes y prueba integrada) deben quedar en verde. Si alguno falla, copiar el error y lo arreglamos. |
 | 3 | ~~Publicar el analizador dinámico~~ | — | ✅ hecho: está en tu copia `MelanyRodriguezR/GameStats` |
 | 4 | **Deploy en Render** | tú | render.com → *New* → *Blueprint* → elegir el repo `GameConsole`. Crea 4 servicios: `gameconsole`, `gameconsole-prolog`, `gameconsole-ingest` y `gameconsole-analytics`. Si Render les pone otro nombre, cambiar las URLs en `render.yaml`. |
 | 5 | **Probar en Render** | tú | Abrir las 4 URLs del README (se duermen tras 15 min: esperar ~1 min la primera vez). |

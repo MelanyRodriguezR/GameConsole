@@ -4,10 +4,9 @@
 #  2. imagenes     → construye las imágenes Docker de la consola y de Prolog
 #  3. e2e          → levanta TODO con docker compose (consola + Prolog + GameStats),
 #                    juega partidas de los 3 juegos por la API y revisa que GameStats las acepte
-#  4. publicar     → solo en main: sube las imágenes a GHCR (ghcr.io/<usuario>/gameconsole-*)
 #
-# El deploy continuo lo hace Render: está conectado al repo y redepliega en cada push a main
-# (ver render.yaml).
+# El deploy continuo (CD) lo hace Render: está conectado al repo, construye las imágenes desde
+# los mismos Dockerfiles y redepliega en cada push a main (ver render.yaml).
 name: CI
 
 on:
@@ -67,27 +66,3 @@ jobs:
       - name: Apagar
         if: always()
         run: docker compose down -v
-
-  publicar:
-    name: Publicar imágenes en GHCR
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: [imagenes, e2e]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Construir y subir
-        run: |
-          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          SHA=sha-${GITHUB_SHA::7}
-          docker build -t ghcr.io/$OWNER/gameconsole-consola:latest -t ghcr.io/$OWNER/gameconsole-consola:$SHA -f consola/Dockerfile .
-          docker build -t ghcr.io/$OWNER/gameconsole-prolog:latest  -t ghcr.io/$OWNER/gameconsole-prolog:$SHA prolog
-          docker push --all-tags ghcr.io/$OWNER/gameconsole-consola
-          docker push --all-tags ghcr.io/$OWNER/gameconsole-prolog
