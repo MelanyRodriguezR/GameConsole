@@ -1,0 +1,11 @@
+{
+  "id": "adivinanza",
+  "nombre": "Adivina el Número",
+  "version": "1.0",
+  "icono": "🔢",
+  "descripcion": "Cada jugador elige un número secreto del 1 al 100 y se turnan para adivinar el del otro con pistas mayor/menor.",
+  "entrada": "index.html",
+  "jugadores": 2,
+  "modos": ["2-jugadores"],
+  "eventos": ["SECRET_CHOSEN", "GUESS", "PLAYER_WON", "PLAYER_LOST"]
+}

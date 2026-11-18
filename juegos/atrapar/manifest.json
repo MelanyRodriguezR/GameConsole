@@ -1,0 +1,11 @@
+{
+  "id": "atrapar",
+  "nombre": "Atrapa Estrellas",
+  "version": "1.0",
+  "icono": "⭐",
+  "descripcion": "Dos canastas atrapan estrellas y esquivan bombas durante 60 segundos. Gana quien tenga más puntos.",
+  "entrada": "index.html",
+  "jugadores": 2,
+  "modos": ["2-jugadores"],
+  "eventos": ["ITEM_CAUGHT", "PLAYER_WON", "PLAYER_LOST"]
+}

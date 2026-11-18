@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Atrapa Estrellas</title>
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+  <header>
+    <h1>⭐ Atrapa Estrellas</h1>
+    <small>2 jugadores en el mismo teclado · 60 segundos · gana quien tenga más puntos</small>
+  </header>
+
+  <main>
+    <div class="zona-juego">
+      <canvas id="lienzo" width="800" height="480" tabindex="0"></canvas>
+      <div class="controles">
+        <div><b class="p1">Jugador 1 (azul)</b><br><kbd>A</kbd> izquierda · <kbd>D</kbd> derecha</div>
+        <div><b class="p2">Jugador 2 (naranja)</b><br><kbd>←</kbd> izquierda · <kbd>→</kbd> derecha</div>
+      </div>
+      <div class="controles">
+        <div>⭐ estrella <b>+1</b> · 🌟 dorada <b>+3</b> (cae más rápido)</div>
+        <div>💣 bomba <b>−2</b> y te deja aturdido un momento</div>
+      </div>
+    </div>
+
+    <div class="lado">
+      <div class="tarjeta">
+        <h2>Jugadores</h2>
+        <label for="nombre1" class="p1">Nombre del jugador 1</label>
+        <input id="nombre1" placeholder="Jugador 1" maxlength="16">
+        <label for="nombre2" class="p2">Nombre del jugador 2</label>
+        <input id="nombre2" placeholder="Jugador 2" maxlength="16">
+        <button id="iniciar">▶ Iniciar</button>
+      </div>
+
+      <div class="tarjeta">
+        <h2>Eventos para GameStats</h2>
+        <div class="solo-fuera">
+          <label for="destino">Enviar a</label>
+          <select id="destino">
+            <option value="local">GameStats local (localhost:8080)</option>
+            <option value="render">GameStats en Render</option>
+            <option value="off">No enviar</option>
+          </select>
+        </div>
+        <div id="estado-gs"></div>
+        <div id="partida"></div>
+        <ul id="bitacora"></ul>
+      </div>
+    </div>
+  </main>
+
+  <!-- El orden importa: base → clases → página -->
+  <script src="js/gamestats.js"></script>
+  <script src="js/teclado.js"></script>
+  <script src="js/objetos.js"></script>
+  <script src="js/canasta.js"></script>
+  <script src="js/atrapar.js"></script>
+  <script src="js/pagina.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

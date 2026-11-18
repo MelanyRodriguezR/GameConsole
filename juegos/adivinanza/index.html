@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Adivina el Número</title>
+  <link rel="stylesheet" href="css/estilo.css">
+  <style>
+    .tablero { display: flex; gap: 12px; flex-wrap: wrap; }
+    .columna { flex: 1 1 240px; min-height: 200px; border: 2px solid transparent; }
+    .columna.turno { border-color: #5b6cff; }
+    .columna ol { padding-left: 0; list-style: none; margin: 8px 0 0; font-size: 15px; line-height: 1.7; }
+    .columna .vacio { color: #6b7190; font-size: 13px; }
+    .rango { font-size: 13px; color: #9aa0b8; }
+    #titulo-fase { font-size: 19px; font-weight: 600; margin: 0 0 12px; line-height: 1.4; }
+    #error { color: #ffb74d; min-height: 22px; font-size: 14px; margin-top: 6px; }
+    #formulario { display: flex; gap: 8px; align-items: stretch; }
+    #formulario input { max-width: 220px; font-size: 22px; text-align: center; }
+    #formulario button { margin-top: 0; width: auto; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🔢 Adivina el Número</h1>
+    <small>2 jugadores por turnos · cada uno adivina el número secreto del otro</small>
+  </header>
+
+  <main>
+    <div class="zona-juego">
+      <div class="tarjeta">
+        <p id="titulo-fase">Escriban sus nombres y presionen ▶ Iniciar</p>
+        <form id="formulario" autocomplete="off">
+          <input id="entrada" type="text" inputmode="numeric" maxlength="3" disabled aria-label="número">
+          <button id="enviar" type="submit" disabled>Enviar</button>
+        </form>
+        <div id="error"></div>
+      </div>
+      <div class="tablero">
+        <div id="col1" class="tarjeta columna"></div>
+        <div id="col2" class="tarjeta columna"></div>
+      </div>
+      <div class="tarjeta" style="font-size:13px;color:#9aa0b8;line-height:1.7">
+        <b>Cómo se juega:</b> cada jugador escribe un número secreto del 1 al 100 sin que el otro mire.
+        Después se turnan para adivinar el número del rival; cada intento recibe la pista "es MAYOR" o "es MENOR".
+        Gana quien adivine primero. Si el jugador 1 adivina, el jugador 2 tiene un último turno para empatar.
+      </div>
+    </div>
+
+    <div class="lado">
+      <div class="tarjeta">
+        <h2>Jugadores</h2>
+        <label for="nombre1" class="p1">Nombre del jugador 1</label>
+        <input id="nombre1" placeholder="Jugador 1" maxlength="16">
+        <label for="nombre2" class="p2">Nombre del jugador 2</label>
+        <input id="nombre2" placeholder="Jugador 2" maxlength="16">
+        <button id="iniciar" type="button">▶ Iniciar</button>
+      </div>
+
+      <div class="tarjeta">
+        <h2>Eventos para GameStats</h2>
+        <div class="solo-fuera">
+          <label for="destino">Enviar a</label>
+          <select id="destino">
+            <option value="local">GameStats local (localhost:8080)</option>
+            <option value="render">GameStats en Render</option>
+            <option value="off">No enviar</option>
+          </select>
+        </div>
+        <div id="estado-gs"></div>
+        <div id="partida"></div>
+        <ul id="bitacora"></ul>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/gamestats.js"></script>
+  <script src="js/jugador.js"></script>
+  <script src="js/fases.js"></script>
+  <script src="js/adivinanza.js"></script>
+  <script src="js/pagina.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
