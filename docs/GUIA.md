@@ -125,9 +125,9 @@ cd consola && INGEST_URL=https://gameconsole-ingest.onrender.com ANALYTICS_URL=h
 | 7 | Panel con estadísticas por juego y generales de GameStats | ✅ (con la rama nueva de GameStats) | ver la observación A |
 | 8 | Cantidad de instancias por juego, actualizada en vivo | ✅ | "veces jugado" e "instancias en curso ahora" |
 | 9 | Instalación, ejecución y deployment reproducibles | ⚠️ | Docker ✅ probado · falta subir a GitHub y desplegar en Render |
-| — | Repositorio Git con historial | ⚠️ | hay commits locales; **falta subirlo a GitHub** |
+| — | Repositorio Git con historial | ✅ | https://github.com/MelanyRodriguezR/GameConsole |
 | — | Docker (consola + Prolog + GameStats) | ✅ probado | `docker-compose.yml` |
-| — | Pipeline CI/CD | ⚠️ | escrito; corre cuando el repo esté en GitHub |
+| — | Pipeline CI/CD | ✅ | GitHub Actions: pruebas, imágenes y prueba integrada |
 | — | Documentación breve | ✅ | `README.md` |
 | — | Video ≤ 15 min con link público | ❌ | `docs/GUION-VIDEO.md` |
 

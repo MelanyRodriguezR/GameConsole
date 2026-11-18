@@ -31,7 +31,7 @@ consola solo las muestra.
 | Panel de estadísticas que consulta a GameStats cada 3 s | ✅ probado |
 | 3 juegos como proyectos independientes (combate, atrapar, adivinanza) | ✅ probados dentro de la consola, en paralelo |
 | Docker (`consola/Dockerfile`, `prolog/Dockerfile`, `docker-compose.yml`) | ✅ escrito · las imágenes corren pruebas al construirse |
-| CI/CD (GitHub Actions) + prueba integrada `scripts/e2e.sh` | ✅ escrito |
+| CI/CD (GitHub Actions) + prueba integrada `scripts/e2e.sh` | ✅ en verde en GitHub |
 | Deploy en Render (`render.yaml`) | ✅ escrito · falta crear el Blueprint en Render |
 
 ## Estructura
