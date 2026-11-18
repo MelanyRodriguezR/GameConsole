@@ -1,0 +1,93 @@
+# CI/CD de GameConsole
+#
+#  1. pruebas      → pruebas de la consola (Node) y de la IA (SWI-Prolog), revisión de los juegos
+#  2. imagenes     → construye las imágenes Docker de la consola y de Prolog
+#  3. e2e          → levanta TODO con docker compose (consola + Prolog + GameStats),
+#                    juega partidas de los 3 juegos por la API y revisa que GameStats las acepte
+#  4. publicar     → solo en main: sube las imágenes a GHCR (ghcr.io/<usuario>/gameconsole-*)
+#
+# El deploy continuo lo hace Render: está conectado al repo y redepliega en cada push a main
+# (ver render.yaml).
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pruebas:
+    name: Pruebas (consola, Prolog y juegos)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Pruebas de la consola
+        working-directory: consola
+        run: node --test
+
+      - name: Revisar sintaxis de los juegos
+        run: |
+          for f in juegos/*/js/*.js consola/server.js consola/src/*.js; do
+            node --check "$f" || exit 1
+          done
+          for m in juegos/*/manifest.json; do
+            node -e "const m=require('./$m'); for (const k of ['id','nombre','version','entrada']) if(!m[k]) throw new Error('$m: falta '+k)"
+            echo "ok $m"
+          done
+
+      - name: Pruebas de la IA (SWI-Prolog)
+        run: docker run --rm -v "$PWD/prolog:/app" -w /app swipl:9.2.9 swipl -g run_tests -t halt pruebas.pl
+
+  imagenes:
+    name: Construir imágenes Docker
+    needs: pruebas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Imagen de la consola
+        run: docker build -t gameconsole-consola -f consola/Dockerfile .
+      - name: Imagen de Prolog
+        run: docker build -t gameconsole-prolog prolog
+
+  e2e:
+    name: Prueba integrada (docker compose)
+    needs: pruebas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prueba de punta a punta
+        run: bash scripts/e2e.sh
+      - name: Logs si falla
+        if: failure()
+        run: docker compose logs --no-color | tail -200
+      - name: Apagar
+        if: always()
+        run: docker compose down -v
+
+  publicar:
+    name: Publicar imágenes en GHCR
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [imagenes, e2e]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Construir y subir
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          SHA=sha-${GITHUB_SHA::7}
+          docker build -t ghcr.io/$OWNER/gameconsole-consola:latest -t ghcr.io/$OWNER/gameconsole-consola:$SHA -f consola/Dockerfile .
+          docker build -t ghcr.io/$OWNER/gameconsole-prolog:latest  -t ghcr.io/$OWNER/gameconsole-prolog:$SHA prolog
+          docker push --all-tags ghcr.io/$OWNER/gameconsole-consola
+          docker push --all-tags ghcr.io/$OWNER/gameconsole-prolog

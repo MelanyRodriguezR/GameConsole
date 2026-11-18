@@ -1,0 +1,58 @@
+# GameConsole completo en una sola orden:
+#
+#   docker compose up --build
+#
+# Levanta:
+#   consola    (Node.js)      http://localhost:3000   ← abrir esta
+#   prolog     (SWI-Prolog)   http://localhost:8081   IA del combate
+#   ingest     (GameStats, Go)     http://localhost:8080   recibe los eventos
+#   analytics  (GameStats, Scala)  http://localhost:9000   calcula las estadísticas
+#
+# ingest y analytics son las imágenes que publica el CI del Proyecto 1 (GameStats) en GHCR.
+# La carpeta ./juegos se monta en la consola: si copias ahí un juego nuevo con su
+# manifest.json, aparece en la consola en unos segundos SIN reiniciar nada.
+
+services:
+  consola:
+    build:
+      context: .
+      dockerfile: consola/Dockerfile
+    ports: ["3000:3000"]
+    environment:
+      INGEST_URL: http://ingest:8080
+      ANALYTICS_URL: http://analytics:9000
+      PROLOG_URL: http://prolog:8081
+    volumes:
+      - ./juegos:/app/juegos:ro
+    depends_on:
+      prolog: { condition: service_started }
+      ingest: { condition: service_healthy }
+    restart: unless-stopped
+
+  prolog:
+    build: ./prolog
+    ports: ["8081:8081"]
+    restart: unless-stopped
+
+  ingest:
+    image: ghcr.io/mauroza/gamestats-ingest:${GAMESTATS_TAG:-latest}
+    ports: ["8080:8080"]
+    environment:
+      ANALYTICS_URL: http://analytics:9000/matches
+      WORKERS: "4"
+    volumes: [ingest-data:/data]
+    depends_on:
+      analytics: { condition: service_healthy }
+    restart: unless-stopped
+
+  analytics:
+    image: ghcr.io/mauroza/gamestats-analytics:${GAMESTATS_TAG:-latest}
+    ports: ["9000:9000"]
+    environment:
+      JAVA_TOOL_OPTIONS: -Xmx512m -XX:+UseSerialGC
+    volumes: [analytics-data:/data]
+    restart: unless-stopped
+
+volumes:
+  ingest-data:
+  analytics-data:

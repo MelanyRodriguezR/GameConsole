@@ -1,0 +1,34 @@
+# Deploy en Render (plan gratis) como Blueprint — igual que GameStats (Proyecto 1).
+#
+# Render construye las imágenes desde los Dockerfiles del repo y vuelve a desplegar en cada
+# push a main (deploy continuo). Los servicios gratis no tienen red privada, así que la
+# consola llama a Prolog y a GameStats por sus URLs públicas.
+#
+# Crear: Render → New → Blueprint → conectar este repositorio. Si Render le da a algún
+# servicio una URL distinta (agrega un sufijo cuando el nombre ya existe), actualizar
+# PROLOG_URL abajo.
+services:
+  - type: web
+    name: gameconsole
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./consola/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/juegos
+    envVars:
+      - key: INGEST_URL
+        value: https://gamestats-ingest.onrender.com
+      - key: ANALYTICS_URL
+        value: https://gamestats-analytics-nz8a.onrender.com
+      - key: PROLOG_URL
+        value: https://gameconsole-prolog.onrender.com
+
+  - type: web
+    name: gameconsole-prolog
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./prolog/Dockerfile
+    dockerContext: ./prolog
+    healthCheckPath: /health

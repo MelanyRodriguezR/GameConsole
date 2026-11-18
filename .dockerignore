@@ -1,0 +1,6 @@
+.git
+.claude
+juegos-viejos
+**/node_modules
+consola/data
+*.md

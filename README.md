@@ -29,8 +29,10 @@ consola solo las muestra.
 | Combate contra la computadora con **IA en SWI-Prolog** | ✅ probado |
 | Eventos a GameStats a través de la consola (cola, lotes, reintentos) | ✅ probado: 88 válidos, 0 rechazados |
 | Panel de estadísticas que consulta a GameStats cada 3 s | ✅ probado |
-| Juegos 2 y 3 (atrapar, adivinanza) como proyectos aparte | ⏳ están en `juegos-viejos/`, falta pasarlos a `juegos/` |
-| Docker, CI/CD, deploy | ⏳ pendiente |
+| 3 juegos como proyectos independientes (combate, atrapar, adivinanza) | ✅ probados dentro de la consola, en paralelo |
+| Docker (`consola/Dockerfile`, `prolog/Dockerfile`, `docker-compose.yml`) | ✅ escrito · las imágenes corren pruebas al construirse |
+| CI/CD (GitHub Actions) + prueba integrada `scripts/e2e.sh` | ✅ escrito |
+| Deploy en Render (`render.yaml`) | ✅ escrito · falta crear el Blueprint en Render |
 
 ## Estructura
 
@@ -41,14 +43,39 @@ consola/          servidor Node.js (sin dependencias) + la página de la consola
   public/         index.html, css/, js/ (app, catalogo, partidas, panel, emisor)
   test/           pruebas (npm test)
 juegos/           UN JUEGO POR CARPETA; la consola los descubre sola
-  combate/        juego completo e independiente (se puede abrir sin la consola)
+  combate/        cada juego es independiente: se puede abrir solo, con doble clic
+  atrapar/
+  adivinanza/
 prolog/
   combate.pl      reglas de decisión de la computadora
   servidor.pl     servicio HTTP de SWI-Prolog
-juegos-viejos/    versiones anteriores (atrapar y adivinanza por migrar)
+  pruebas.pl      pruebas de las reglas (plunit)
+scripts/
+  e2e.sh          prueba integrada (docker compose + partidas + panel)
+  partidas-demo.js  manda partidas de los 3 juegos en paralelo (sirve para llenar el panel)
+docker-compose.yml  consola + Prolog + GameStats (ingest y analytics)
+render.yaml         deploy en Render
+.github/workflows/ci.yml  CI/CD
 ```
 
-## Ejecutar (local)
+## Ejecutar con Docker (recomendado)
+
+```bash
+docker compose up --build
+```
+
+Abrir http://localhost:3000. Levanta la consola, Prolog y GameStats (ingest + analytics, con las imágenes que publica el
+CI del Proyecto 1). La carpeta `juegos/` está montada: si copias ahí un juego nuevo, aparece en la consola sin reiniciar.
+
+Prueba integrada (la misma que corre el CI):
+
+```bash
+bash scripts/e2e.sh
+```
+
+> Si Docker Desktop dice *"Recursos insuficientes en el sistema"* (WSL), cerrar programas pesados o reiniciar la PC.
+
+## Ejecutar sin Docker (desarrollo)
 
 Se necesita Node.js 20+ y SWI-Prolog.
 
@@ -87,6 +114,11 @@ Se agrega **sin reiniciar nada**: copiando la carpeta a `juegos/` (aparece en �
 | Juego | Cómo se juega | Eventos propios |
 |---|---|---|
 | 🥊 Combate | Gana quien gane 2 rondas. J1: `A D W` + `F` golpe, `G` patada, `S` bloquear. J2: flechas + `K` `L` `↓`. Modo **contra la computadora**. | `ATTACK`, `ROUND_END`, `AI_DECISION` |
+| ⭐ Atrapa Estrellas | 60 s; cada jugador mueve su canasta (J1 `A D`, J2 `← →`). ⭐ +1, 🌟 +3, 💣 −2 y aturde. Gana quien tenga más puntos. | `ITEM_CAUGHT` |
+| 🔢 Adivina el Número | Cada uno elige un número secreto (1–100) y se turnan para adivinar el del otro con pistas mayor/menor. Si el J1 acierta, el J2 tiene un último turno para empatar. | `SECRET_CHOSEN`, `GUESS` |
+
+Cada juego trae su propia copia de `js/gamestats.js` (la base común): así cada uno es un proyecto
+independiente que funciona solo o dentro de la consola.
 
 Todos mandan además `MATCH_STARTED`, `PLAYER_JOINED`, `PLAYER_WON`, `PLAYER_LOST` y `MATCH_FINISHED`.
 
@@ -137,11 +169,44 @@ como evento `AI_DECISION`.
 | **Mediator** | `GestorPartidas` | Los juegos no conocen a la consola ni entre ellos; los mensajes pasan por el gestor |
 | **State** | Fases de Adivinanza | Cada fase decide qué hacer con lo que escribe el jugador |
 
+Además: **herencia y polimorfismo** (`Objeto` → `Estrella`, `Dorada`, `Bomba`) y **encapsulación** con campos
+privados (`#vida` del luchador, `#puntos` de la canasta, `#secreto` del jugador de Adivinanza).
+
 ## Pruebas
 
 ```bash
-cd consola && npm test
+cd consola && npm test                                  # consola
+cd prolog && swipl -g run_tests -t halt pruebas.pl      # reglas de la IA
+bash scripts/e2e.sh                                     # todo integrado (Docker)
 ```
+
+## CI/CD
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) corre en cada push:
+
+| Job | Qué hace |
+|---|---|
+| Pruebas | pruebas de la consola, revisión de los juegos (sintaxis y manifiestos) y pruebas de Prolog |
+| Imágenes | construye las imágenes Docker de la consola y de Prolog (que vuelven a correr sus pruebas) |
+| Prueba integrada | `scripts/e2e.sh`: `docker compose up` con GameStats, juega partidas de los 3 juegos en paralelo y revisa el panel |
+| Publicar | solo en `main`: sube `gameconsole-consola` y `gameconsole-prolog` a GHCR |
+
+**Deploy continuo:** Render está conectado al repositorio y redepliega en cada push a `main`.
+
+## Deployment (Render)
+
+Igual que GameStats: [`render.yaml`](render.yaml) define dos servicios Docker gratis, `gameconsole` (consola) y
+`gameconsole-prolog`. La consola usa el GameStats ya publicado:
+
+| Servicio | URL |
+|---|---|
+| Consola | https://gameconsole.onrender.com |
+| IA Prolog | https://gameconsole-prolog.onrender.com |
+| GameStats ingest / analytics | https://gamestats-ingest.onrender.com · https://gamestats-analytics-nz8a.onrender.com |
+
+Crear desde cero: Render → **New → Blueprint** → elegir este repositorio. Si Render asigna otra URL a Prolog,
+cambiar `PROLOG_URL` en `render.yaml`. En el plan gratis los servicios se duermen tras 15 min: **antes de la demo,
+abrir las 4 URLs** y esperar ~1 min.
 
 ## Equipo
 
