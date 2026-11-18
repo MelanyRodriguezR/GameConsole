@@ -124,7 +124,7 @@ cd consola && INGEST_URL=https://gameconsole-ingest.onrender.com ANALYTICS_URL=h
 | 6 | Eventos compatibles con GameStats, envíos concurrentes | ✅ | prueba integrada: 0 rechazados |
 | 7 | Panel con estadísticas por juego y generales de GameStats | ✅ (con la rama nueva de GameStats) | ver la observación A |
 | 8 | Cantidad de instancias por juego, actualizada en vivo | ✅ | "veces jugado" e "instancias en curso ahora" |
-| 9 | Instalación, ejecución y deployment reproducibles | ⚠️ | Docker ✅ probado · falta subir a GitHub y desplegar en Render |
+| 9 | Instalación, ejecución y deployment reproducibles | ✅ | Docker · GitHub · CI en verde · Render: https://gameconsole-w8oh.onrender.com |
 | — | Repositorio Git con historial | ✅ | https://github.com/MelanyRodriguezR/GameConsole |
 | — | Docker (consola + Prolog + GameStats) | ✅ probado | `docker-compose.yml` |
 | — | Pipeline CI/CD | ✅ | GitHub Actions: pruebas, imágenes y prueba integrada |
@@ -196,8 +196,8 @@ existe ni en la consola ni en GameStats, y GameStats igual le calcula ganador, t
 | 1 | **Subir a GitHub** | ✅ hecho | Crear un repo vacío en github.com (por ejemplo `GameConsole`, **público**), y luego: `git remote add origin https://github.com/<usuario>/GameConsole.git` y `git push -u origin main` |
 | 2 | **Revisar el CI** | ✅ | En GitHub → pestaña *Actions*: los 3 trabajos (pruebas, imágenes y prueba integrada) deben quedar en verde. Si alguno falla, copiar el error y lo arreglamos. |
 | 3 | ~~Publicar el analizador dinámico~~ | — | ✅ hecho: está en tu copia `MelanyRodriguezR/GameStats` |
-| 4 | **Deploy en Render** | tú | render.com → *New* → *Blueprint* → elegir el repo `GameConsole`. Crea 4 servicios: `gameconsole`, `gameconsole-prolog`, `gameconsole-ingest` y `gameconsole-analytics`. Si Render les pone otro nombre, cambiar las URLs en `render.yaml`. |
-| 5 | **Probar en Render** | tú | Abrir las 4 URLs del README (se duermen tras 15 min: esperar ~1 min la primera vez). |
+| 4 | **Deploy en Render** | ✅ hecho | render.com → *New* → *Blueprint* → elegir el repo `GameConsole`. Crea 4 servicios: `gameconsole`, `gameconsole-prolog`, `gameconsole-ingest` y `gameconsole-analytics`. Si Render les pone otro nombre, cambiar las URLs en `render.yaml`. |
+| 5 | **Probar en Render** | ✅ hecho | Abrir las 4 URLs del README (se duermen tras 15 min: esperar ~1 min la primera vez). |
 | 6 | **Borrar `juegos-viejos/`** | tú | Ya no se usa y no está en git; se puede borrar a mano. |
 | 7 | **Grabar el video** | ustedes | Seguir `docs/GUION-VIDEO.md`; subirlo a YouTube (no listado está bien) y poner el link en el README y en la entrega. |
 | 8 | **Entregar** | ustedes | Tec Digital: link del repo + link del video, antes del viernes 10 pm. |
