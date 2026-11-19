@@ -20,8 +20,7 @@ consola solo las muestra.
                                     └──POST /combate/decision──► IA SWI-Prolog (:8081)
 ```
 
-**En línea:** https://gameconsole-w8oh.onrender.com · **Cómo usarlo y probarlo paso a paso:**
-[docs/COMO-PROBAR.md](docs/COMO-PROBAR.md) · Guion del video: [docs/GUION-VIDEO.md](docs/GUION-VIDEO.md)
+**En línea:** https://gameconsole-w8oh.onrender.com
 
 ## Estado actual
 
