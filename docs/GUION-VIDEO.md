@@ -1,7 +1,13 @@
 # Guion del video (≤ 15 minutos)
 
-Antes de grabar: `docker compose up --build` (o abrir las URLs de Render y esperar 1 minuto).
-Tener abiertas la consola (http://localhost:3000) y esta guía.
+**Antes de grabar** (ver `docs/COMO-PROBAR.md`):
+- **En internet:** abrir las 4 URLs de Render y esperar a que los 3 puntitos de la consola estén verdes
+  (https://gameconsole-w8oh.onrender.com). Si los servicios se durmieron, las estadísticas anteriores se borraron:
+  jugar primero y mostrar el panel después, en la misma sesión.
+- **En tu PC:** `docker compose up --build` y abrir http://localhost:3000. Hace falta para la parte de "agregar un
+  juego copiando una carpeta" (minuto 1:00).
+- Opcional, para que el panel arranque con datos:
+  `node scripts/partidas-demo.js https://gameconsole-w8oh.onrender.com/api/events`
 
 | Min | Qué mostrar | Qué decir |
 |---|---|---|
